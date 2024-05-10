@@ -15,7 +15,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::all();
-        return $this->ok("success", $users->makeHidden(['token']));
+        return $this->ok("已列出所有用户信息", $users->makeHidden(['token']));
     }
 
     /**
@@ -56,7 +56,10 @@ class UserController extends Controller
     public function show(string $id)
     {
         $user = User::find($id);
-        return $this->ok("success", $user->makeHidden(['token']));
+        if (!$user) {
+            return $this->res('用户未找到', 404);
+        }
+        return $this->ok("用户已找到", $user->makeHidden(['token']));
     }
 
     /**
@@ -66,7 +69,7 @@ class UserController extends Controller
     {
         $user = User::find($id);
         if (!$user) {
-            return $this->jsonRes(404, '用户未找到');
+            return $this->res('用户未找到', 404);
         }
         $data = $request->only([
             'avatar_url',
@@ -75,22 +78,23 @@ class UserController extends Controller
             'notes',
             'is_admin'
         ]);
-        $data = array_filter($data, function ($value) {
-            return !empty($value) || $value == 0;
-        });
+
         $request->validate([
             'avatar_url' => 'nullable|string',
             'firstname' => 'nullable|string',
             'lastname' => 'nullable|string',
             'notes' => 'nullable|string',
-            'is_admin' => 'nullable|integer|in:0,1',
+            'is_admin' => 'nullable|in:0,1|string',
         ]);
-        if (isset($data['is_admin']) && $data['is_admin'] === '0' && Auth::id() === $user->id) {
-            return $this->jsonRes(400, "出于系统安全相关的原因，不能取消自己的管理员权限");
+        $data = array_filter($data, function ($value) {
+            return !empty($value) || $value === "0";
+        });
+        if (isset($data['is_admin']) && $data['is_admin'] === "0" && Auth::id() === $user->id) {
+            return $this->res("出于系统安全相关的原因，不能取消自己的管理员权限", 400);
         }
         $user->fill($data)->save();
         $user->refresh();
-        return $this->ok('变更成功', $user->makeHidden(['token']));
+        return $this->ok('用户信息变更成功', $user->makeHidden(['token']));
     }
 
     /**
@@ -106,6 +110,6 @@ class UserController extends Controller
             return $this->res("管理员不能删除自己", 403);
         }
         $user->delete();
-        $this->ok();
+        return $this->ok("删除用户成功");
     }
 }

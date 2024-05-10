@@ -13,7 +13,7 @@ class Controller extends BaseController
     {
         return !$data
             ? (!$msg ? response()->json(['msg' => "success"], 200) : response()->json(['msg' => $msg], 200))
-            : response()->json(['msg' => "success", 'data' => $data], 200);
+            : response()->json(['msg' => $msg, 'data' => $data], 200);
     }
 
     public function res($msg, $code)

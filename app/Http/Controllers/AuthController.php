@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,7 @@ class AuthController extends Controller
         ]);
         if (Auth::once($data)) {
             $user = Auth::user();
-            $user->token = md5($user->email);
+            $user->token = md5($user->username . Carbon::now()->format("Y-m-d H:i:s"));
             $user->save();
             return $this->ok("success", $user);
         }
