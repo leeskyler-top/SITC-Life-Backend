@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
@@ -33,7 +34,16 @@ Route::prefix("/auth")->group(function () {
 });
 
 Route::middleware("admin")->group(function () {
-   Route::apiResource("user", UserController::class)->where(['id' => '[0-9]+']);
-   Route::apiResource("task", TaskController::class)->where(['id' => '[0-9]+']);
-   Route::apiResource("semester", SemesterController::class)->where(['id' => '[0-9]+']);
+    Route::prefix("/files")->group(function () {
+        Route::get("/avatar/{user_id}", [FileController::class, "avatar"])->where(['user_id' => '[0-9]+']);
+    });
+   Route::apiResource("user", UserController::class)->where(['user' => '[0-9]+']);
+   Route::apiResource("task", TaskController::class)->where(['task' => '[0-9]+']);
+   Route::apiResource("semester", SemesterController::class)->where(['semester' => '[0-9]+']);
+});
+
+Route::middleware("auth:api")->group(function () {
+   Route::prefix("/files")->group(function () {
+      Route::get("/myavatar", [FileController::class, "myAvatar"]);
+   });
 });

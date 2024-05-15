@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -35,14 +36,14 @@ class UserController extends Controller
             'avatar_url' => 'required',
             'username' => [
                 'required',
-                'email:filter',
                 Rule::unique('users', 'username')->where('deleted_at')
             ],
             'firstname' => 'required',
             'lastname' => 'required',
             'notes' => 'required',
-            'is_admin' => 'required|integer|in:0,1',
+            'is_admin' => 'required|string|in:0,1',
         ]);
+        $data['avatar_url'] = Storage::put('images/avatar', $data['avatar_url']);
         $data['password'] = User::genPwd();
         $user = User::create($data);
         $user->refresh();

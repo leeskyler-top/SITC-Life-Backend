@@ -61,7 +61,7 @@ class User extends Authenticatable
     {
         do {
             $str = Str::random(8);
-        } while (preg_match("/^[a-zA-Z]+$", $str) || preg_match("/^\d+$", $str));
+        } while (preg_match("/^[a-zA-Z]+$/", $str) || preg_match("/^\d+$/", $str));
         return $str;
     }
 
